@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QS History Fighter: Migration & Empire Arcade (1830–1939)</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Press Start 2P for Arcade UI, Inter & Lora for Academic Legibility -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arcade: ['"Press Start 2P"', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Lora', 'serif'],
+          },
+          colors: {
+            arcadeBg: '#090a10',
+            arcadePanel: '#121520',
+            neonGreen: '#39ff14',
+            neonRed: '#ff073a',
+            neonYellow: '#ffe600',
+            neonCyan: '#00f0ff',
+            gold: '#ffd700',
+            goldDark: '#b8860b'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #06070a;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(255, 7, 58, 0.06) 0%, transparent 50%);
+      color: #f1f5f9;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    /* Scanline Arcade Cabinet Overlay */
+    .scanlines {
+      position: relative;
+      overflow: hidden;
+    }
+    .scanlines::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      z-index: 20;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .neon-text-cyan {
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.8), 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+    .neon-text-yellow {
+      text-shadow: 0 0 8px rgba(255, 230, 0, 0.8), 0 0 20px rgba(255, 230, 0, 0.4);
+    }
+    .neon-text-red {
+      text-shadow: 0 0 8px rgba(255, 7, 58, 0.8), 0 0 20px rgba(255, 7, 58, 0.4);
+    }
+
+    .arcade-box {
+      background: rgba(18, 21, 32, 0.92);
+      border: 3px solid #00f0ff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 15px rgba(0, 240, 255, 0.1);
+      border-radius: 12px;
+    }
+
+    .arcade-btn {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border: 2px solid #38bdf8;
+      color: #f0f9ff;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 0 #0284c7;
+    }
+    .arcade-btn:hover:not(:disabled) {
+      background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+      border-color: #7dd3fc;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #0369a1;
+      color: #ffffff;
+    }
+    .arcade-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #0369a1;
+    }
+    .arcade-btn.correct {
+      background: linear-gradient(180deg, #15803d 0%, #166534 100%) !important;
+      border-color: #4ade80 !important;
+      box-shadow: 0 4px 0 #14532d !important;
+      color: #ffffff !important;
+    }
+    .arcade-btn.wrong {
+      background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%) !important;
+      border-color: #f87171 !important;
+      box-shadow: 0 4px 0 #7f1d1d !important;
+      color: #ffffff !important;
+    }
+
+    /* Fighter Animations */
+    @keyframes fighterHit {
+      0% { transform: translateX(0) scale(1); filter: brightness(1); }
+      25% { transform: translateX(-15px) scale(0.95); filter: brightness(2) hue-rotate(90deg); }
+      50% { transform: translateX(15px) scale(1.05); filter: brightness(0.5); }
+      100% { transform: translateX(0) scale(1); filter: brightness(1); }
+    }
+    @keyframes fighterAttack {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(35px) scale(1.1); }
+      100% { transform: translateX(0); }
+    }
+    @keyframes superPulse {
+      0%, 100% { box-shadow: 0 0 15px #ffd700, inset 0 0 10px #ffd700; }
+      50% { box-shadow: 0 0 35px #ffe600, inset 0 0 20px #ffe600; }
+    }
+
+    .anim-hit { animation: fighterHit 0.4s ease-in-out; }
+    .anim-attack { animation: fighterAttack 0.35s ease-in-out; }
+    .super-active { animation: superPulse 1s infinite; }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #090a10; }
+    ::-webkit-scrollbar-thumb { background: #0284c7; border-radius: 4px; }
+  </style>
+</head>
+<body class="font-sans antialiased flex flex-col justify-between min-h-screen p-2 md:p-4 scanlines">
+
+  <!-- TOP HEADER / ARCADE BRANDING -->
+  <header class="max-w-6xl w-full mx-auto mb-3">
+    <div class="arcade-box p-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-amber-500/50">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl md:text-3xl">🕹️</span>
+        <div>
+          <h1 class="font-arcade text-xs md:text-sm text-neonYellow neon-text-yellow tracking-wider">
+            QS HISTORY FIGHTER
+          </h1>
+          <p class="text-[10px] md:text-xs text-cyan-300 font-semibold tracking-wide uppercase">
+            Migration & Empire (1830–1939) • QS National 5 History
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] font-arcade text-cyan-300 border border-cyan-500/40 transition">
+          🔊 AUDIO: ON
+        </button>
+        <button onclick="openStageSelectModal()" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-[11px] font-arcade text-yellow-300 border border-yellow-500/40 transition">
+          🗺️ STAGES
+        </button>
+        <button onclick="openTeacherEditor()" class="px-3 py-1.5 rounded-lg bg-amber-950/80 hover:bg-amber-900 text-[11px] font-arcade text-amber-200 border border-amber-500/40 transition">
+          ⚙️ TEACHER
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN ARENA CANVAS & QUIZ WORKSPACE -->
+  <main class="max-w-6xl w-full mx-auto flex-1 flex flex-col gap-4">
+
+    <!-- FIGHTER HUD HEADER (HEALTH BARS & KO TIMER) -->
+    <section class="arcade-box p-3 md:p-4 border-cyan-500/60 relative overflow-hidden">
+      <div class="grid grid-cols-12 items-center gap-2 md:gap-4">
+        
+        <!-- PLAYER HUD (5 COLS) -->
+        <div class="col-span-5 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between text-xs font-arcade text-neonGreen">
+            <span id="playerNameDisplay" class="truncate">THE ARCHIVIST</span>
+            <span id="playerHpText" class="font-bold">100 HP</span>
+          </div>
+          <!-- HP Bar Outer -->
+          <div class="w-full h-4 md:h-5 bg-slate-950 rounded-full border-2 border-slate-700 overflow-hidden p-0.5">
+            <div id="playerHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-300 w-full"></div>
+          </div>
+          <!-- Super Meter -->
+          <div class="flex items-center gap-2">
+            <span class="text-[9px] font-arcade text-yellow-400">SUPER:</span>
+            <div class="flex-1 h-2 bg-slate-950 rounded-full border border-yellow-600/50 overflow-hidden p-0.5">
+              <div id="playerSuperBar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 rounded-full transition-all duration-300 w-0"></div>
+            </div>
+            <button id="superAttackBtn" onclick="triggerSuperAttack()" disabled class="px-2 py-0.5 rounded text-[9px] font-arcade bg-slate-800 text-slate-500 border border-slate-700 disabled:opacity-50">
+              ⚡ READY
+            </button>
+          </div>
+        </div>
+
+        <!-- CENTER TIMER & VS BADGE (2 COLS) -->
+        <div class="col-span-2 flex flex-col items-center justify-center">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-950 border-2 border-neonRed flex items-center justify-center shadow-lg">
+            <span id="arenaTimer" class="font-arcade text-xs md:text-sm text-neonYellow">60</span>
+          </div>
+          <span class="font-arcade text-[9px] text-red-400 tracking-widest mt-1">ROUND <span id="roundNumText">1</span></span>
+        </div>
+
+        <!-- OPPONENT HUD (5 COLS) -->
+        <div class="col-span-5 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between text-xs font-arcade text-neonRed">
+            <span id="opponentHpText" class="font-bold">100 HP</span>
+            <span id="opponentNameDisplay" class="truncate">THE IGNORANCE BOSS</span>
+          </div>
+          <!-- HP Bar Outer -->
+          <div class="w-full h-4 md:h-5 bg-slate-950 rounded-full border-2 border-slate-700 overflow-hidden p-0.5 dir-rtl">
+            <div id="opponentHpBar" class="h-full bg-gradient-to-l from-rose-600 to-red-500 rounded-full transition-all duration-300 w-full"></div>
+          </div>
+          <!-- Combo Display -->
+          <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[9px] font-arcade text-slate-400 uppercase">COMBO:</span>
+            <span id="comboCounterText" class="text-xs font-arcade text-neonCyan font-bold">0x</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VISUAL ARENA STAGE STAGE DISPLAY (AVATARS & STAGE BACKGROUND) -->
+    <section id="arenaStageBox" class="arcade-box h-44 sm:h-56 md:h-64 relative overflow-hidden flex items-end justify-between p-4 md:p-8 bg-slate-950 border-cyan-500/40">
+      
+      <!-- Dynamic Stage Name Overlay -->
+      <div class="absolute top-3 left-3 bg-slate-950/80 border border-cyan-500/50 px-3 py-1 rounded text-[10px] font-arcade text-cyan-300">
+        STAGE <span id="stageNumLabel">1</span>: <span id="stageTitleLabel">LEITH & INDUSTRIAL PORTS</span>
+      </div>
+
+      <!-- Stage Background Canvas / Graphic Render -->
+      <div id="stageVisualGraphic" class="absolute inset-0 opacity-30 pointer-events-none flex items-center justify-center font-arcade text-6xl md:text-8xl text-slate-700">
+        🚢
+      </div>
+
+      <!-- PLAYER FIGHTER AVATAR -->
+      <div id="playerAvatar" class="relative z-10 flex flex-col items-center transition-transform duration-200">
+        <div class="w-20 h-28 sm:w-24 sm:h-36 md:w-28 md:h-40 flex items-center justify-center">
+          <!-- Rendered Player SVG Avatar -->
+          <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-[0_0_10px_rgba(57,255,20,0.5)]">
+            <rect x="35" y="10" width="30" height="28" rx="6" fill="#38bdf8" />
+            <rect x="40" y="18" width="8" height="6" fill="#090a10" />
+            <rect x="52" y="18" width="8" height="6" fill="#090a10" />
+            <path d="M25 42 L75 42 L65 85 L35 85 Z" fill="#0284c7" />
+            <rect x="15" y="45" width="12" height="30" rx="4" fill="#38bdf8" />
+            <rect x="73" y="45" width="12" height="30" rx="4" fill="#38bdf8" />
+            <rect x="32" y="85" width="14" height="30" fill="#1e293b" />
+            <rect x="54" y="85" width="14" height="30" fill="#1e293b" />
+          </svg>
+        </div>
+        <span class="font-arcade text-[9px] text-emerald-400 bg-slate-950/90 px-2 py-0.5 rounded border border-emerald-500/40">
+          SCHOLAR
+        </span>
+      </div>
+
+      <!-- IMPACT / HIT SPARK GRAPHIC (CENTER) -->
+      <div id="hitSparkOverlay" class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none text-center">
+        <span class="font-arcade text-3xl md:text-5xl text-yellow-300 neon-text-yellow animate-ping block">
+          💥 HIT!
+        </span>
+        <span id="hitDamageAmount" class="font-arcade text-sm md:text-xl text-neonRed font-bold block mt-1">
+          -20 HP
+        </span>
+      </div>
+
+      <!-- OPPONENT FIGHTER AVATAR -->
+      <div id="opponentAvatar" class="relative z-10 flex flex-col items-center transition-transform duration-200">
+        <div class="w-20 h-28 sm:w-24 sm:h-36 md:w-28 md:h-40 flex items-center justify-center">
+          <!-- Rendered Opponent SVG Avatar -->
+          <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-[0_0_10px_rgba(255,7,58,0.5)]">
+            <rect x="35" y="10" width="30" height="28" rx="6" fill="#f43f5e" />
+            <rect x="38" y="18" width="10" height="4" fill="#090a10" />
+            <rect x="52" y="18" width="10" height="4" fill="#090a10" />
+            <path d="M20 42 L80 42 L70 85 L30 85 Z" fill="#be123c" />
+            <rect x="10" y="45" width="12" height="32" rx="4" fill="#f43f5e" />
+            <rect x="78" y="45" width="12" height="32" rx="4" fill="#f43f5e" />
+            <rect x="30" y="85" width="15" height="30" fill="#4c0519" />
+            <rect x="55" y="85" width="15" height="30" fill="#4c0519" />
+          </svg>
+        </div>
+        <span id="opponentTitleBadge" class="font-arcade text-[9px] text-rose-400 bg-slate-950/90 px-2 py-0.5 rounded border border-rose-500/40">
+          RIVAL
+        </span>
+      </div>
+
+    </section>
+
+    <!-- QUESTION & MULTIPLE CHOICE INTERFACE -->
+    <section class="arcade-box p-4 md:p-6 border-cyan-500/60 flex flex-col gap-4">
+      
+      <div class="flex items-center justify-between border-b border-cyan-500/30 pb-2">
+        <span class="font-arcade text-xs text-cyan-300 flex items-center gap-2">
+          <span>🧠</span> QS ACADEMIC KNOWLEDGE STRIKE
+        </span>
+        <span id="questionProgressText" class="font-arcade text-[10px] text-slate-400">
+          QUESTION 1 OF 8
+        </span>
+      </div>
+
+      <!-- Question Prompt Box -->
+      <h2 id="questionPromptText" class="font-serif text-sm sm:text-base md:text-lg text-slate-100 font-semibold leading-relaxed">
+        Loading question prompt...
+      </h2>
+
+      <!-- Answer Choice Buttons Grid (A, B, C, D) -->
+      <div id="optionsGridContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- QS REVISION DEBRIEF BOX (Appears on answer select) -->
+      <div id="debriefBox" class="hidden p-4 rounded-xl bg-slate-900/90 border-2 border-cyan-500/50 text-slate-200 text-xs md:text-sm font-serif leading-relaxed mt-2">
+        <div class="flex items-center gap-2 text-yellow-400 font-arcade text-xs mb-2">
+          <span>📚</span> QS NATIONAL 5 REVISION DEBRIEF:
+        </div>
+        <p id="debriefContentText" class="text-slate-300"></p>
+        <div class="flex justify-end mt-3">
+          <button id="nextQuestionBtn" onclick="advanceNextQuestion()" class="px-5 py-2 rounded-lg font-arcade text-xs bg-cyan-600 hover:bg-cyan-500 text-white transition border border-cyan-300 shadow-md">
+            NEXT STRIKE ➔
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- STAGE SELECT MODAL -->
+  <div id="stageSelectModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+    <div class="arcade-box max-w-2xl w-full p-6 border-amber-500 flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-amber-500/30 pb-3">
+        <h3 class="font-arcade text-sm text-yellow-300 neon-text-yellow">
+          🗺️ SELECT MIGRATION & EMPIRE STAGE
+        </h3>
+        <button onclick="closeStageSelectModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        
+        <button onclick="selectStage(0)" class="p-4 rounded-xl bg-slate-900 hover:bg-slate-800 border-2 border-cyan-500/60 text-left flex flex-col gap-1 transition">
+          <span class="font-arcade text-[10px] text-cyan-400">STAGE 1 (BOOKLET 1)</span>
+          <span class="font-bold text-sm text-white">Leith & Industrial Ports</span>
+          <span class="text-xs text-slate-400 font-serif">Immigration to Scotland, push/pull factors & Empire trade links.</span>
+        </button>
+
+        <button onclick="selectStage(1)" class="p-4 rounded-xl bg-slate-900 hover:bg-slate-800 border-2 border-emerald-500/60 text-left flex flex-col gap-1 transition">
+          <span class="font-arcade text-[10px] text-emerald-400">STAGE 2 (BOOKLET 2)</span>
+          <span class="font-bold text-sm text-white">Industrial Scotland & Slums</span>
+          <span class="text-xs text-slate-400 font-serif">Immigrant housing, disease, mining, navvies, cafes & Catholic Church.</span>
+        </button>
+
+        <button onclick="selectStage(2)" class="p-4 rounded-xl bg-slate-900 hover:bg-slate-800 border-2 border-yellow-500/60 text-left flex flex-col gap-1 transition">
+          <span class="font-arcade text-[10px] text-yellow-400">STAGE 3 (BOOKLET 3)</span>
+          <span class="font-bold text-sm text-white">The Emigration Docks</span>
+          <span class="text-xs text-slate-400 font-serif">Highland Clearances, subdivision, land opportunities & help schemes.</span>
+        </button>
+
+        <button onclick="selectStage(3)" class="p-4 rounded-xl bg-slate-900 hover:bg-slate-800 border-2 border-rose-500/60 text-left flex flex-col gap-1 transition">
+          <span class="font-arcade text-[10px] text-rose-400">STAGE 4 (BOOKLET 4)</span>
+          <span class="font-bold text-sm text-white">Empire Frontiers</span>
+          <span class="text-xs text-slate-400 font-serif">Scots in India, Canada, Australia, New Zealand & individual pioneers.</span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHER EDITOR MODAL -->
+  <div id="teacherModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+    <div class="arcade-box max-w-3xl w-full p-6 border-amber-500 flex flex-col gap-4 max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-amber-500/30 pb-3">
+        <h3 class="font-arcade text-xs md:text-sm text-amber-300">
+          ⚙️ TEACHER EDITOR SUITE (QS JSON DATASET)
+        </h3>
+        <button onclick="closeTeacherEditor()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300 font-serif leading-relaxed">
+        Inspect or edit the underlying QS National 5 stage questions below. Edits persist to local storage on this browser.
+      </p>
+
+      <textarea id="jsonEditorArea" class="w-full flex-1 min-h-[300px] p-3 rounded-lg bg-slate-950 font-mono text-xs text-cyan-300 border border-slate-700 focus:border-cyan-400 focus:outline-none"></textarea>
+
+      <div class="flex items-center justify-between gap-3 border-t border-amber-500/30 pt-3">
+        <button onclick="confirmResetDefaultJSON()" class="px-4 py-2 rounded-lg bg-red-950 hover:bg-red-900 text-xs font-arcade text-red-200 border border-red-800 transition">
+          RESTORE DEFAULTS
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeTeacherEditor()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-arcade text-slate-300 transition">
+            CANCEL
+          </button>
+          <button onclick="saveTeacherJSON()" class="px-5 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-arcade transition">
+            SAVE DATASET
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM CONFIRMATION MODAL -->
+  <div id="customConfirmModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden">
+    <div class="arcade-box max-w-md w-full p-6 border-cyan-500 flex flex-col gap-4">
+      <h3 id="confirmModalTitle" class="font-arcade text-xs text-yellow-300">
+        CONFIRMATION REQUIRED
+      </h3>
+      <p id="confirmModalMessage" class="text-xs text-slate-300 font-serif leading-relaxed">
+        Are you sure you wish to proceed?
+      </p>
+      <div class="flex justify-end gap-3 pt-2 border-t border-cyan-500/30">
+        <button id="confirmModalCancelBtn" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-arcade text-slate-300 transition">
+          CANCEL
+        </button>
+        <button id="confirmModalOkBtn" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-arcade transition">
+          CONFIRM
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE OVERLAY / ROUND START & KO BANNER -->
+  <div id="roundAnnouncementOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-40 pointer-events-none hidden">
+    <div class="text-center flex flex-col items-center gap-2">
+      <h1 id="announcementTitle" class="font-arcade text-3xl md:text-6xl text-neonYellow neon-text-yellow animate-bounce">
+        ROUND 1
+      </h1>
+      <h2 id="announcementSubtitle" class="font-arcade text-sm md:text-xl text-neonCyan neon-text-cyan">
+        READY... FIGHT!
+      </h2>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- JAVASCRIPT ENGINE -->
+  <script>
+    /* ==========================================================================
+       1. DATASETS FOR STAGES 1-4 (DIRECTLY FROM REVISION BOOKLETS 1-4)
+       ========================================================================== */
+    const DEFAULT_STAGES_DATA = [
+      {
+        stageId: 1,
+        stageTitle: "Leith & Industrial Ports",
+        bookletRef: "Booklet 1 — Migration to Scotland (1830s–1939)",
+        graphicSymbol: "🚢",
+        opponentName: "THE MIGRATION MYTHMAKER",
+        questions: [
+          {
+            prompt: "Which area in Coatbridge became heavily populated by Irish immigrants, earning a distinct nickname?",
+            options: ["Little Ireland", "Irish Haven", "Green District", "Emerald Valley"],
+            correctIndex: 0,
+            debrief: "Coatbridge became known as 'Little Ireland' due to the dense concentration of Irish immigrants settling there to work in the expanding coal and iron industries."
+          },
+          {
+            prompt: "Where did wealthy Jewish families predominantly settle after leaving the Gorbals in Glasgow?",
+            options: ["Pollockshields", "Coatbridge", "Falkirk", "Bellshill"],
+            correctIndex: 0,
+            debrief: "While many working-class Jewish families initially settled in the Gorbals, wealthier Jewish families later established homes in Pollockshields."
+          },
+          {
+            prompt: "Why did many Lithuanian immigrants move to Lanarkshire towns like Bellshill and Mossend?",
+            options: ["To escape agricultural depression and avoid Russian army conscription", "To open ice cream parlours and cafes", "To trade in tobacco and spices", "To build railway canals"],
+            correctIndex: 0,
+            debrief: "Lithuanians fled an agricultural depression in their homeland and escaped forced conscription into the Russian Imperial Army, settling near ironworks in Lanarkshire."
+          },
+          {
+            prompt: "What major push factor forced millions of Irish people to move to Scotland during the 1840s?",
+            options: ["The Irish Potato Famine causing widespread starvation", "Violent religious pogroms in Dublin", "A severe drought wiping out wheat crops", "Forced conscription into the British Navy"],
+            correctIndex: 0,
+            debrief: "The Irish Potato Famine of the 1840s destroyed the primary food crop, causing mass starvation and pushing millions to seek refuge in Scotland."
+          },
+          {
+            prompt: "How did wages in Scotland compare to wages in Ireland for immigrant laborers between 1830 and 1939?",
+            options: ["Wages in Scotland were often up to six times higher", "Wages were identical in both countries", "Wages in Ireland were twice as high", "Scotland paid workers only in food rations"],
+            correctIndex: 0,
+            debrief: "Scotland offered much higher wage potential—often up to six times higher than agricultural wages available in Ireland."
+          },
+          {
+            prompt: "Which Indian raw material was shipped to Dundee factories, creating vital trade links within the Empire?",
+            options: ["Jute from Calcutta", "Cotton from Bombay", "Tea from Assam", "Silk from Madras"],
+            correctIndex: 0,
+            debrief: "Raw jute imported from Calcutta in India supplied Dundee's world-famous textile mills, creating massive economic links across the Empire."
+          },
+          {
+            prompt: "Why was Glasgow nicknamed the 'Second City of the Empire' during the 19th century?",
+            options: ["Merchants invested vast wealth gained from Empire trade into the city", "It had the second largest population in Europe", "It was the capital city of Scotland", "It was built entirely by imperial soldiers"],
+            correctIndex: 0,
+            debrief: "Glasgow earned this title as tobacco and sugar merchants brought back enormous fortunes from imperial trade, investing in grand civic architecture and industry."
+          }
+        ]
+      },
+      {
+        stageId: 2,
+        stageTitle: "Industrial Scotland & Slums",
+        bookletRef: "Booklet 2 — Immigrant Experiences in Scotland (1830s–1939)",
+        graphicSymbol: "🏭",
+        opponentName: "THE SLUM OVERSEER",
+        questions: [
+          {
+            prompt: "By 1861, what proportion of coal miners in Coatbridge were born in Ireland?",
+            options: ["45% of coal miners", "10% of coal miners", "80% of coal miners", "25% of coal miners"],
+            correctIndex: 0,
+            debrief: "By 1861, Irish immigrants made up 45% of the coal mining workforce in Coatbridge, undertaking dangerous underground labor."
+          },
+          {
+            prompt: "What nickname was given to early Italian ice-cream sellers who sold from wheelbarrows in working-class Scottish streets?",
+            options: ["Hokey pokey men", "Navvies", "Peddlers", "Craftsmen"],
+            correctIndex: 0,
+            debrief: "Italian ice-cream vendors were nicknamed 'hokey pokey men' (derived from the Italian phrase 'ecco un poco' meaning 'here is a little')."
+          },
+          {
+            prompt: "Why were Italian cafes sometimes viewed with hostility or disapproval by some Scots?",
+            options: ["They remained open on the Sabbath (Sunday)", "They refused to serve hot drinks", "They charged excessive prices", "They only opened during night hours"],
+            correctIndex: 0,
+            debrief: "Strict Sabbatarian Scots criticized Italian cafe owners for opening their businesses on Sundays (the Sabbath) to serve ice cream and refreshments."
+          },
+          {
+            prompt: "How did the Catholic Church assist illiterate Irish immigrants arriving in Scottish industrial cities?",
+            options: ["Priests wrote letters home for immigrants who could not read or write", "Priests paid for all steamship travel tickets", "The Church provided free land in the countryside", "The Church ran heavy industrial ironworks"],
+            correctIndex: 0,
+            debrief: "Catholic priests played a key social role by writing letters home to Ireland for illiterate workers, as well as founding schools, charities, and football clubs like Celtic and Hibernian."
+          },
+          {
+            prompt: "Which epidemic disease spread rapidly through Scottish slum housing due to dirty, contaminated water supplies?",
+            options: ["Cholera", "Smallpox", "Malaria", "Scurvy"],
+            correctIndex: 0,
+            debrief: "Cholera claimed thousands of lives in overcrowded immigrant slum housing due to inadequate sanitation and sewage contaminating water pumps."
+          },
+          {
+            prompt: "What legislation was passed by the British Parliament in 1905 to restrict immigrants from outside the British Empire?",
+            options: ["The Aliens Act 1905", "The Scottish Settlement Act", "The Emigration Restrictions Bill", "The Imperial Border Act"],
+            correctIndex: 0,
+            debrief: "The Aliens Act 1905 was introduced to limit non-Empire immigration into Britain, targeting groups such as Eastern European Jewish refugees fleeing persecution."
+          }
+        ]
+      },
+      {
+        stageId: 3,
+        stageTitle: "The Emigration Docks",
+        bookletRef: "Booklet 3 — Scottish Emigration (1830s–1939)",
+        graphicSymbol: "⛵",
+        opponentName: "THE EVICTION LANDLORD",
+        questions: [
+          {
+            prompt: "Why did many Highland landowners evict crofters from their homes during the Highland Clearances?",
+            options: ["To clear the land for more profitable sheep grazing", "To build massive cotton factories", "To plant dense timber forests", "To build royal summer palaces"],
+            correctIndex: 0,
+            debrief: "Landowners discovered that crofting yielded poor financial returns, so they forcibly evicted crofting families to make room for lucrative sheep farming."
+          },
+          {
+            prompt: "What assistance did the Highland and Island Emigration Society (HIES) provide to poor crofter families?",
+            options: ["They funded passage to Australia to allow crofters to farm new land", "They provided free houses in Glasgow slums", "They bought steamships for crofters to keep", "They paid crofters to join the British Army"],
+            correctIndex: 0,
+            debrief: "The HIES raised funds to assist impoverished Highland crofters with travel costs, sending them to Australia to clear land and farm."
+          },
+          {
+            prompt: "What major engineering project in Australia utilized granite quarried and cut by Scottish stonemasons from Aberdeen?",
+            options: ["The Sydney Harbour Bridge Pylons", "The Melbourne Railway Station", "The Canberra Parliament House", "The Perth Harbor Docks"],
+            correctIndex: 0,
+            debrief: "Aberdeen stonemasons emigrated to Australia to quarry and cut granite blocks specifically for the iconic Sydney Harbour Bridge pylons."
+          },
+          {
+            prompt: "In 1882, which Scot successfully pioneered the first shipment of frozen meat sent from New Zealand to Britain?",
+            options: ["William Davidson", "Andrew Carnegie", "Sir John A. Macdonald", "Henry Niccol"],
+            correctIndex: 0,
+            debrief: "William Davidson organized the historic 1882 voyage of the ship 'Dunedin', successfully transporting frozen lamb from New Zealand to Britain."
+          },
+          {
+            prompt: "Which British government act in 1922 provided loans and grants to assist Scots in emigrating and retraining abroad?",
+            options: ["The Empire Settlement Act 1922", "The Colonial Land Act", "The Overseas Farmers Act", "The Migration Assistance Bill"],
+            correctIndex: 0,
+            debrief: "The Empire Settlement Act 1922 allocated millions of pounds in government loans and passage grants to encourage British settlers to move to Empire dominions."
+          },
+          {
+            prompt: "How many handloom weavers, displaced by industrial machinery in Scotland, were assisted to emigrate to Canada?",
+            options: ["At least 20,000 weavers", "Around 1,000 weavers", "Over 100,000 weavers", "Fewer than 500 weavers"],
+            correctIndex: 0,
+            debrief: "Industrial power looms ruined handloom weaving in Scotland; wealthy donors and government schemes funded the emigration of at least 20,000 weavers to Canada."
+          }
+        ]
+      },
+      {
+        stageId: 4,
+        stageTitle: "Empire Frontiers",
+        bookletRef: "Booklet 4 — Experience of Scots Abroad (1830s–1939)",
+        graphicSymbol: "🌍",
+        opponentName: "THE IMPERIAL BARON",
+        questions: [
+          {
+            prompt: "Which Scottish-born politician served as Canada's very first Prime Minister?",
+            options: ["Sir John A. Macdonald", "Andrew Fisher", "Peter Fraser", "James Busby"],
+            correctIndex: 0,
+            debrief: "Sir John A. Macdonald, born in Glasgow, played a key role in Canadian Confederation and became Canada's first Prime Minister."
+          },
+          {
+            prompt: "What negative impact did Scottish and European land settlement in Canada have on First Nations people?",
+            options: ["First Nations were forced off ancestral lands onto cramped, unhygienic Reserves", "First Nations were forced to move to Scottish cities", "First Nations lost access to ocean fishing rights in Europe", "First Nations were forced to work in Dundee factories"],
+            correctIndex: 0,
+            debrief: "To make way for European settlers, indigenous First Nations populations were forcibly displaced onto poorly equipped Reserves where European diseases caused heavy casualties."
+          },
+          {
+            prompt: "Which Scot, who worked 12-hour days in Ayrshire coal mines as a child, emigrated to Australia and became Prime Minister three times?",
+            options: ["Andrew Fisher", "John Muir", "Andrew Carnegie", "George Stephen"],
+            correctIndex: 0,
+            debrief: "Andrew Fisher rose from working in Ayrshire mines as a child to serving as Prime Minister of Australia three times between 1908 and 1915, introducing maternity allowances and the navy."
+          },
+          {
+            prompt: "What conflict occurred in 1843 resulting in the massacre of 150 Aboriginal Australians by European settlers?",
+            options: ["The Warrigal Creek Massacre", "The Waitangi Conflict", "The Sydney Harbor Clash", "The Melbourne Station Raid"],
+            correctIndex: 0,
+            debrief: "The massacre at Warrigal Creek in 1843 highlighted the violent, brutal displacement and killing of Aboriginal Australians during colonial expansion."
+          },
+          {
+            prompt: "Why did the Treaty of Waitangi cause severe long-term misunderstanding between Scottish settlers and the Māori in New Zealand?",
+            options: ["The English and Māori versions had key translation differences regarding sovereignty and land ownership", "The treaty was written entirely in Gaelic", "The treaty banned Māori people from farming", "The treaty required all Māori to move to Scotland"],
+            correctIndex: 0,
+            debrief: "James Busby helped draft the treaty, but the Māori translation guaranteed chieftainship while the English version ceded complete sovereignty, creating conflicting legal promises."
+          },
+          {
+            prompt: "Which Scottish emigrant born in East Lothian helped found Yosemite National Park and successfully campaigned for wilderness preservation in America?",
+            options: ["John Muir", "Learmonth Dalrymple", "Henry Niccol", "John Smith"],
+            correctIndex: 0,
+            debrief: "John Muir became one of North America's most famous naturalists, founding the Sierra Club and persuading President Roosevelt to expand Yosemite National Park."
+          },
+          {
+            prompt: "What milestone in female education was achieved by Learmonth Dalrymple's campaigning in New Zealand?",
+            options: ["Otago Girls' High School was founded and the University of Otago accepted women in 1871", "Women were given free medical degrees in Edinburgh", "Girls were banned from working in agriculture", "New Zealand created the world's first primary school"],
+            correctIndex: 0,
+            debrief: "Learmonth Dalrymple successfully campaigned for Otago Girls' High School and persuaded the University of Otago to admit women in 1871—the first university in Australasia to do so."
+          }
+        ]
+      }
+    ];
+
+    /* ==========================================================================
+       2. GLOBAL GAME ENGINE STATE
+       ========================================================================== */
+    const STORAGE_KEY = "QS_HISTORY_FIGHTER_DATA_V1";
+    let stagesData = [];
+
+    let currentStageIndex = 0;
+    let stageQuestionQueue = [];
+    let queuePointer = 0;
+    let currentQuestionObj = null;
+
+    let playerHp = 100;
+    let opponentHp = 100;
+    let superMeter = 0; // 0 to 100
+    let comboCount = 0;
+    let roundNumber = 1;
+    let arenaTimeSeconds = 60;
+    let timerInterval = null;
+
+    let soundEnabled = true;
+
+    function safeGetStorage(key) {
+      try {
+        const val = localStorage.getItem(key);
+        return val ? JSON.parse(val) : null;
+      } catch (e) {
+        console.warn("LocalStorage restricted:", e);
+        return null;
+      }
+    }
+
+    function safeSetStorage(key, val) {
+      try {
+        localStorage.setItem(key, JSON.stringify(val));
+      } catch (e) {
+        console.warn("LocalStorage write restricted:", e);
+      }
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /* ==========================================================================
+       3. WEB AUDIO API SYNTHESIZER
+       ========================================================================== */
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundToggleBtn').textContent = soundEnabled ? "🔊 AUDIO: ON" : "🔇 AUDIO: OFF";
+      showToast(soundEnabled ? "Arcade Sound Effects Enabled" : "Sound Muted", "info");
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+
+        if (type === 'hit') {
+          // Punch impact sound
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.15);
+        } else if (type === 'super') {
+          // Super strike chime
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.25, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'wrong') {
+          // Counter attack damage sound
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(120, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.25);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.25);
+        } else if (type === 'gong') {
+          // Round Start Gong
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.8);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.8);
+        }
+      } catch (e) {}
+    }
+
+    /* ==========================================================================
+       4. UI TOASTS & MODALS
+       ========================================================================== */
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let bg = "bg-slate-900 border-cyan-500 text-cyan-200";
+      if (type === "success") bg = "bg-emerald-950 border-emerald-500 text-emerald-200";
+      if (type === "error") bg = "bg-rose-950 border-rose-500 text-rose-200";
+
+      toast.className = `px-4 py-2.5 rounded-xl border font-arcade text-[10px] shadow-2xl transition transform translate-y-2 opacity-0 flex items-center gap-2 ${bg}`;
+      toast.innerHTML = `<span>${type === 'success' ? '⚡' : 'ℹ'}</span> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    function showConfirmDialog(title, message, onConfirm) {
+      const modal = document.getElementById('customConfirmModal');
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalMessage').textContent = message;
+
+      const okBtn = document.getElementById('confirmModalOkBtn');
+      const cancelBtn = document.getElementById('confirmModalCancelBtn');
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      };
+
+      okBtn.onclick = () => { cleanup(); onConfirm(); };
+      cancelBtn.onclick = cleanup;
+      modal.classList.remove('hidden');
+    }
+
+    function triggerRoundAnnouncement(titleText, subtitleText, callback) {
+      const overlay = document.getElementById('roundAnnouncementOverlay');
+      document.getElementById('announcementTitle').textContent = titleText;
+      document.getElementById('announcementSubtitle').textContent = subtitleText;
+
+      overlay.classList.remove('hidden');
+      playSound('gong');
+
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        if (callback) callback();
+      }, 1400);
+    }
+
+    /* ==========================================================================
+       5. STAGE & QUEUE MANAGEMENT (ZERO DUPLICATION ENGINE)
+       ========================================================================== */
+    function openStageSelectModal() {
+      document.getElementById('stageSelectModal').classList.remove('hidden');
+    }
+
+    function closeStageSelectModal() {
+      document.getElementById('stageSelectModal').classList.add('hidden');
+    }
+
+    function selectStage(stageIdx) {
+      currentStageIndex = stageIdx;
+      closeStageSelectModal();
+      resetStageMatch();
+    }
+
+    function resetStageMatch() {
+      const stage = stagesData[currentStageIndex];
+
+      // Update Labels
+      document.getElementById('stageNumLabel').textContent = stage.stageId;
+      document.getElementById('stageTitleLabel').textContent = stage.stageTitle.toUpperCase();
+      document.getElementById('stageVisualGraphic').textContent = stage.graphicSymbol;
+      document.getElementById('opponentNameDisplay').textContent = stage.opponentName;
+
+      // Reset Combat Stats
+      playerHp = 100;
+      opponentHp = 100;
+      superMeter = 0;
+      comboCount = 0;
+      arenaTimeSeconds = 60;
+
+      updateHudDisplay();
+
+      // Initialize Fisher-Yates Shuffled Queue
+      stageQuestionQueue = shuffleArray(stage.questions.map((_, idx) => idx));
+      queuePointer = 0;
+
+      triggerRoundAnnouncement(`ROUND ${roundNumber}`, "READY... FIGHT!", () => {
+        startTimer();
+        loadNextQuestion();
+      });
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      document.getElementById('arenaTimer').textContent = arenaTimeSeconds;
+      timerInterval = setInterval(() => {
+        arenaTimeSeconds--;
+        document.getElementById('arenaTimer').textContent = arenaTimeSeconds;
+        if (arenaTimeSeconds <= 0) {
+          clearInterval(timerInterval);
+          handleTimeOut();
+        }
+      }, 1000);
+    }
+
+    function updateHudDisplay() {
+      document.getElementById('playerHpText').textContent = `${Math.max(0, playerHp)} HP`;
+      document.getElementById('playerHpBar').style.width = `${Math.max(0, playerHp)}%`;
+
+      document.getElementById('opponentHpText').textContent = `${Math.max(0, opponentHp)} HP`;
+      document.getElementById('opponentHpBar').style.width = `${Math.max(0, opponentHp)}%`;
+
+      document.getElementById('playerSuperBar').style.width = `${superMeter}%`;
+      const superBtn = document.getElementById('superAttackBtn');
+      if (superMeter >= 100) {
+        superBtn.disabled = false;
+        superBtn.className = "px-2 py-0.5 rounded text-[9px] font-arcade bg-yellow-400 text-black border border-yellow-200 super-active cursor-pointer";
+        superBtn.textContent = "⚡ SUPER!";
+      } else {
+        superBtn.disabled = true;
+        superBtn.className = "px-2 py-0.5 rounded text-[9px] font-arcade bg-slate-800 text-slate-500 border border-slate-700 disabled:opacity-50";
+        superBtn.textContent = "⚡ READY";
+      }
+
+      document.getElementById('comboCounterText').textContent = `${comboCount}x`;
+      document.getElementById('roundNumText').textContent = roundNumber;
+    }
+
+    /* ==========================================================================
+       6. QUESTION DISPLAY & OPTION RANDOMIZATION
+       ========================================================================== */
+    function loadNextQuestion() {
+      const stage = stagesData[currentStageIndex];
+
+      // Reset queue if exhausted (non-repeating cycle)
+      if (queuePointer >= stageQuestionQueue.length) {
+        stageQuestionQueue = shuffleArray(stage.questions.map((_, idx) => idx));
+        queuePointer = 0;
+        showToast("Stage Question Queue Refreshed!", "info");
+      }
+
+      const qIndex = stageQuestionQueue[queuePointer];
+      currentQuestionObj = stage.questions[qIndex];
+
+      document.getElementById('questionProgressText').textContent = `QUESTION ${queuePointer + 1} OF ${stage.questions.length}`;
+      document.getElementById('questionPromptText').textContent = currentQuestionObj.prompt;
+      document.getElementById('debriefBox').classList.add('hidden');
+
+      // Dynamic Option Shuffling (A, B, C, D)
+      const optionsContainer = document.getElementById('optionsGridContainer');
+      const shuffledOptions = shuffleArray(currentQuestionObj.options.map((optText, origIdx) => ({
+        text: optText,
+        isCorrect: (origIdx === currentQuestionObj.correctIndex)
+      })));
+
+      let html = '';
+      shuffledOptions.forEach((opt, idx) => {
+        html += `
+          <button id="optBtn_${idx}" onclick="handleAnswerChoice(${opt.isCorrect}, ${idx})" class="arcade-btn rounded-xl p-3.5 text-left font-serif text-xs sm:text-sm leading-relaxed flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-slate-950 border border-cyan-400 text-cyan-300 font-arcade text-xs flex items-center justify-center flex-shrink-0">
+              ${String.fromCharCode(65 + idx)}
+            </span>
+            <span class="flex-1 text-slate-100">${opt.text}</span>
+          </button>
+        `;
+      });
+
+      optionsContainer.innerHTML = html;
+    }
+
+    /* ==========================================================================
+       7. COMBAT & DAMAGE LOGIC
+       ========================================================================== */
+    function handleAnswerChoice(isCorrect, optionIdx) {
+      const btns = document.querySelectorAll('#optionsGridContainer button');
+      btns.forEach(b => b.disabled = true);
+
+      const clickedBtn = document.getElementById(`optBtn_${optionIdx}`);
+      const playerAvatar = document.getElementById('playerAvatar');
+      const opponentAvatar = document.getElementById('opponentAvatar');
+      const hitSpark = document.getElementById('hitSparkOverlay');
+
+      if (isCorrect) {
+        // Correct Answer Strike
+        comboCount++;
+        const baseDamage = 20;
+        const comboBonus = (comboCount - 1) * 5;
+        const totalDamage = baseDamage + comboBonus;
+
+        opponentHp -= totalDamage;
+        superMeter = Math.min(100, superMeter + 25);
+
+        if (clickedBtn) clickedBtn.classList.add('correct');
+        playSound('hit');
+
+        // Animations
+        playerAvatar.classList.add('anim-attack');
+        opponentAvatar.classList.add('anim-hit');
+        
+        document.getElementById('hitDamageAmount').textContent = `-${totalDamage} HP (COMBO ${comboCount}x!)`;
+        hitSpark.classList.remove('hidden');
+
+        setTimeout(() => {
+          playerAvatar.classList.remove('anim-attack');
+          opponentAvatar.classList.remove('anim-hit');
+          hitSpark.classList.add('hidden');
+        }, 500);
+
+        showToast(`SPECIAL MOVE! -${totalDamage} HP Damage Dealt!`, "success");
+
+      } else {
+        // Incorrect Answer Counter Attack
+        comboCount = 0;
+        const damageTaken = 15;
+        playerHp -= damageTaken;
+
+        if (clickedBtn) clickedBtn.classList.add('wrong');
+        playSound('wrong');
+
+        opponentAvatar.classList.add('anim-attack');
+        playerAvatar.classList.add('anim-hit');
+
+        setTimeout(() => {
+          opponentAvatar.classList.remove('anim-attack');
+          playerAvatar.classList.remove('anim-hit');
+        }, 500);
+
+        showToast(`COUNTER ATTACKED! -${damageTaken} HP Lost!`, "error");
+      }
+
+      updateHudDisplay();
+
+      // Show QS Revision Debrief
+      document.getElementById('debriefContentText').textContent = currentQuestionObj.debrief;
+      document.getElementById('debriefBox').classList.remove('hidden');
+
+      // Check Match Over Conditions
+      if (opponentHp <= 0) {
+        clearInterval(timerInterval);
+        setTimeout(() => handleVictory(), 600);
+      } else if (playerHp <= 0) {
+        clearInterval(timerInterval);
+        setTimeout(() => handleDefeat(), 600);
+      }
+    }
+
+    function triggerSuperAttack() {
+      if (superMeter < 100) return;
+      superMeter = 0;
+      const superDamage = 40;
+      opponentHp -= superDamage;
+
+      playSound('super');
+      showToast(`⚡ CRITICAL SUPER STRIKE! -${superDamage} HP!`, "success");
+
+      const opponentAvatar = document.getElementById('opponentAvatar');
+      opponentAvatar.classList.add('anim-hit');
+      setTimeout(() => opponentAvatar.classList.remove('anim-hit'), 500);
+
+      updateHudDisplay();
+
+      if (opponentHp <= 0) {
+        clearInterval(timerInterval);
+        setTimeout(() => handleVictory(), 600);
+      }
+    }
+
+    function advanceNextQuestion() {
+      queuePointer++;
+      loadNextQuestion();
+    }
+
+    function handleTimeOut() {
+      showToast("TIME EXPIRED!", "error");
+      if (playerHp > opponentHp) {
+        handleVictory();
+      } else {
+        handleDefeat();
+      }
+    }
+
+    function handleVictory() {
+      triggerRoundAnnouncement("K.O.!", "STAGE CLEARED!", () => {
+        showConfirmDialog(
+          "VICTORY ACHIEVED!",
+          `You defeated ${stagesData[currentStageIndex].opponentName}! Advance to the next stage?`,
+          () => {
+            currentStageIndex = (currentStageIndex + 1) % stagesData.length;
+            roundNumber++;
+            resetStageMatch();
+          }
+        );
+      });
+    }
+
+    function handleDefeat() {
+      triggerRoundAnnouncement("K.O.", "DEFEATED!", () => {
+        showConfirmDialog(
+          "MATCH OVER",
+          "You ran out of HP. Re-enter the Knowledge Arena to try again?",
+          () => {
+            resetStageMatch();
+          }
+        );
+      });
+    }
+
+    /* ==========================================================================
+       8. TEACHER EDITOR SUITE
+       ========================================================================== */
+    function openTeacherEditor() {
+      document.getElementById('jsonEditorArea').value = JSON.stringify(stagesData, null, 2);
+      document.getElementById('teacherModal').classList.remove('hidden');
+    }
+
+    function closeTeacherEditor() {
+      document.getElementById('teacherModal').classList.add('hidden');
+    }
+
+    function saveTeacherJSON() {
+      try {
+        const parsed = JSON.parse(document.getElementById('jsonEditorArea').value);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          stagesData = parsed;
+          safeSetStorage(STORAGE_KEY, stagesData);
+          closeTeacherEditor();
+          resetStageMatch();
+          showToast("QS Stage Dataset updated successfully!", "success");
+        } else {
+          showToast("JSON must be a non-empty array of stage objects.", "error");
+        }
+      } catch (e) {
+        showToast("JSON Syntax Error: " + e.message, "error");
+      }
+    }
+
+    function confirmResetDefaultJSON() {
+      showConfirmDialog(
+        "RESTORE DEFAULTS",
+        "Reset all questions back to the default Booklets 1-4 dataset?",
+        () => {
+          stagesData = [...DEFAULT_STAGES_DATA];
+          safeSetStorage(STORAGE_KEY, stagesData);
+          closeTeacherEditor();
+          resetStageMatch();
+          showToast("Default dataset restored.", "success");
+        }
+      );
+    }
+
+    /* ==========================================================================
+       9. INITIALIZATION
+       ========================================================================== */
+    function init() {
+      const stored = safeGetStorage(STORAGE_KEY);
+      if (stored && Array.isArray(stored) && stored.length > 0) {
+        stagesData = stored;
+      } else {
+        stagesData = [...DEFAULT_STAGES_DATA];
+      }
+
+      resetStageMatch();
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(init, 1);
+    } else {
+      document.addEventListener('DOMContentLoaded', init);
+      window.addEventListener('load', init);
+    }
+  </script>
+</body>
+</html>
